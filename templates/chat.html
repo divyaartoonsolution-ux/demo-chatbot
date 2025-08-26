@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot</title>
+  <style>
+    body { font-family: Arial; background: #faf9f9; }
+    .chatbox { max-width: 400px; margin: auto; background-image: url("/static/images/bg3.jfif") ; border-radius: 10px; padding: 20px; height: 70vh; overflow-y: auto; box-shadow: #757474 1px 3px 7px;}
+    .bot, .user { padding: 8px 12px; margin: 5px; border-radius: 15px; display: inline-block; }
+    .bot { background: #e1f0ff; text-align: left; float: left; clear: both; }
+    .user { background: #d1ffd6; text-align: right; float: right; clear: both; }
+    .input-area { display: flex; margin: 20px auto; max-width: 400px; }
+    input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 10px; margin-left: 5px; border-radius: 5px; border: none; background: #007bff; color: white; cursor: pointer; }
+  </style>  
+</head>
+
+<body>
+  <div class="chatbox" id="chatbox"></div>
+  <div class="input-area">
+    <input id="message" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      let input = document.getElementById("message");
+      let text = input.value.trim();
+      if (!text) return;
+
+      addMessage("🧑 You: " + text, "user");
+      input.value = "";
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+        const data = await response.json();
+        addMessage("💻 Bot: " + data.reply, "bot");
+      } catch (err) {
+        addMessage("❌ Error: could not reach server", "bot");
+      }
+    }
+
+    function addMessage(msg, cls) {
+      let div = document.createElement("div");
+      div.className = cls;
+      div.textContent = msg;
+      document.getElementById("chatbox").appendChild(div);
+      document.getElementById("chatbox").scrollTop = document.getElementById("chatbox").scrollHeight;
+    }
+
+    // Allow Enter key to send
+    document.getElementById("message").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
